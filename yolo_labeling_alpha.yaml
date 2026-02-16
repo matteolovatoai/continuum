@@ -1,0 +1,10 @@
+# path dei dati
+path: ./data/detection/
+# dove trovare le immagini di training: path + images/train
+train: images/train
+# validation (yolo prova a vedere se ha capito): path + images/val
+val: images/val
+# classi
+nc: 1 # numero classi, opzionale se esiste names
+names:
+  0: mattoncino
