@@ -8,8 +8,9 @@ venv/
 .DS_Store
 Thumbs.db
 
-# --- Dataset ---
+# --- Dataset & modelli---
 data/
+models/
 
 # --- Pesi dei modelli ---
 *.pt
