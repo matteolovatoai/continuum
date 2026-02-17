@@ -32,9 +32,9 @@ results = model.train(
     fliplr=0.5,             # Specchia l'immagine (50% probabilità)
 )
 
-path_onnx = model.export(
+'''path_onnx = model.export(
     format="onnx", 
     imgsz=640, 
     dynamic=True, 
     simplify=True
-)
+)'''
