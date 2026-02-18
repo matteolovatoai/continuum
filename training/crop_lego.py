@@ -50,7 +50,7 @@ def extract_aligned_lego(img, obb_box, padding_factor=1.1):
     return final_crop
 
 
-# Carica il modello (.pt o .onnx, Ultralytics li gestisce entrambi)
+# Carica il modello
 model = YOLO(str(DIR_PROJECT / "models/yolo_labeling_alpha/weights/best.pt"))
 
 # Predizione (senza save_crop)
