@@ -1,10 +1,10 @@
+import asyncio
 import base64
 from contextlib import asynccontextmanager
-from tabnanny import verbose
 from time import sleep
 import threading
 import cv2
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, WebSocket, WebSocketDisconnect
 from ultralytics import YOLO
 
 from src.utils import DIR_YOLO_ALPHA
@@ -34,6 +34,7 @@ def update_frame():
         if result.obb and len(result.obb) > 0:
             data_stored["frame"] = frame #type: ignore
             data_stored["frame_with_boxes"] = result.plot() #type: ignore
+            # fix this ..... 
             data_stored["coordinates"] = result.obb.cls.tolist()  # type: ignore
         sleep(0.2)
 
@@ -54,13 +55,37 @@ def get_root():
 def get_coordinates():
     # legge l'ultimo frame salvato
     frame = data_stored.get("frame")
+    coords = data_stored.get("coords")
     if frame is not None:
         # trasforma l'array num py in .jpg
-        success, buffer = cv2.imencode('.jpg', frame) # type: ignore
+        _, buffer = cv2.imencode('.jpg', frame) # type: ignore
         jpg_as_text = base64.b64encode(buffer).decode('utf-8')
-        return {"status": "Ok", "frame": f"data:image/jpeg;base64,{jpg_as_text}", "coordinates": data_stored["coordinates"]}
+        return {"status": "Ok", "coordinates": coords, "frame": f"data:image/jpeg;base64,{jpg_as_text}"}
     else:
         return {"status": "Errore nel recuperare l'immagine."}
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            frame = data_stored.get("frame")
+            coords = data_stored.get("coords")
+
+            if frame is not None:
+                _, buffer = cv2.imencode('.jpg', frame) # type: ignore
+                jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+                # push dei dati verso il sito
+                await websocket.send_json({
+                    "image": f"data:image/jpeg;base64,{jpg_as_text}",
+                    "coords": coords
+                })
+
+            await asyncio.sleep(0.2)
+            
+    except WebSocketDisconnect:
+        print("Client disconnesso")
+
 
 # lancio la funzione di cattura della camera con un thread per non bloccare il server con openCV.read
 thread = threading.Thread(target=update_frame, daemon=True)
