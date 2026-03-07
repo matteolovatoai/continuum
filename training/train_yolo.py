@@ -15,13 +15,15 @@ model = YOLO(DIR_MODELS / "yolov8s-obb.pt")
 
 # 2. Avviamo il training
 results = model.train(
-    name="yolo_labeling_alpha", # nome con cui salvo il modello
+    name="yolo_obb_final", # nome con cui salvo il modello
     project=DIR_MODELS,           # cartella dove salvo il progetto
-    data="yolo_labeling_alpha.yaml",    # dove sono i dati? guarda dentro il file yaml
-    epochs=100,             # Con poche foto, servono un po' di epoche
+    data="yolo_obb_final.yaml",    # dove sono i dati? guarda dentro il file yaml
+    epochs=200,             
+    patience=30,            # se non ci sono miglioramenti per 30 epoche di fila, fermati
     imgsz=640,              # Standard
     device="mps",           # GPU del Mac
     batch=8,                # Batch piccolo per 30 immagini
+    workers=0,              # niente processi asincroni, si rubano la ram tra loro
     plots=True,             # Genera i grafici per vedere se impara
     mixup=0.1,              # Aiuta a gestire le sovrapposizioni
     hsv_h=0.015,            # Varia leggermente il colore
