@@ -88,7 +88,7 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/dashboard")
 async def get_dashboard():
     # Sostituisci l'IP qui sotto con quello del tuo PC!
-    server_ip = "localhost" 
+    server_ip = "192.168.1.191"
     
     html_content = f"""
     <html>
