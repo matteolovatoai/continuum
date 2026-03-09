@@ -8,9 +8,9 @@ from fastapi import FastAPI, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from ultralytics import YOLO
 
-from src.utils import DIR_YOLO_ALPHA
+from src.utils import DIR_YOLO
 # carico yolo solo la prima volta
-model = YOLO(str(DIR_YOLO_ALPHA))
+model = YOLO(str(DIR_YOLO))
 # dati di riferimento dell'ultimo frame valido
 data_stored = {"status": "start"}
 camera = cv2.VideoCapture(0)
@@ -88,7 +88,7 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/dashboard")
 async def get_dashboard():
     # Sostituisci l'IP qui sotto con quello del tuo PC!
-    server_ip = "192.168.1.191"
+    server_ip = "localhost"
     
     html_content = f"""
     <html>

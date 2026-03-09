@@ -7,6 +7,7 @@ DIR_AI = DIR_PROJECT / "ai-service"
 DIR_WEB = DIR_PROJECT / "web"
 DIR_MODELS = DIR_PROJECT / "models"
 DIR_YOLO_ALPHA = DIR_MODELS / "yolo_labeling_alpha" / "weights" / "best.pt"
+DIR_YOLO = DIR_MODELS / "yolo_obb_final" / "weights" / "best.pt"
 
 
 if __name__ == "__main__":

@@ -52,27 +52,21 @@ def extract_aligned_lego(img, obb_box, padding_factor=1.1):
 
 # Carica il modello
 model = YOLO(str(DIR_PROJECT / "models/yolo_labeling_alpha/weights/best.pt"))
+img_path = "path to image"
+results = model.predict(source=img_path, conf=0.6)
 
-data_path = DIR_DATA / "detection" / "images"
-data_path_img = data_path / "img"
-data_path_crop = data_path / "crop"
+img_orig = cv2.imread(img_path)
 
-
-for img_path in data_path_img.iterdir():
-    results = model.predict(source=img_path, conf=0.6)
-
-    img_orig = cv2.imread(img_path)
-
-    for r in results:
-        # I risultati OBB sono in r.obb
-        if r.obb is not None:
-            # xywhr: centro_x, centro_y, width, height, rotation (in radianti)
-            for j, box in enumerate(r.obb.xywhr.cpu().numpy()): # type: ignore
-                
-                # Creiamo il rettangolo per il ritaglio dritto (Bounding Box orizzontale)
-                # Aggiungiamo un piccolo margine per non tagliare i bordi
-                crop = extract_aligned_lego(img_orig, box)
-                
-                if crop and crop.size > 0:
-                    cv2.imwrite(f"{data_path_crop}/crop_lego_{j}.jpg", crop) # type: ignore
-                    print(f"✅ Crop {j} salvato con successo.")
+for r in results:
+    # I risultati OBB sono in r.obb
+    if r.obb is not None:
+        # xywhr: centro_x, centro_y, width, height, rotation (in radianti)
+        for j, box in enumerate(r.obb.xywhr.cpu().numpy()): # type: ignore
+            
+            # Creiamo il rettangolo per il ritaglio dritto (Bounding Box orizzontale)
+            # Aggiungiamo un piccolo margine per non tagliare i bordi
+            crop = extract_aligned_lego(img_orig, box)
+            
+            if crop and crop.size > 0:
+                cv2.imwrite(f"{data_path_crop}/crop_lego_{j}.jpg", crop) # type: ignore
+                print(f"✅ Crop {j} salvato con successo.")
