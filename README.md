@@ -9,7 +9,7 @@ Benvenuti nella repository del progetto! Per mantenere il codice pulito e funzio
 4. `git config --global pull.rebase true`
 
 ## 🚀 Come contribuire (Git Workflow)
-Il branch `main` è protetto. Segui questi passaggi per ogni modifica:
+Segui questi passaggi per ogni modifica:
 
 1. **Aggiorna il locale:** `git pull origin main`
 2. **Crea un branch:** `git checkout -b feat/nome-tua-funzione`
