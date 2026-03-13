@@ -24,3 +24,20 @@ Segui questi passaggi per ogni modifica:
 - `/src`: Funzioni comuni (Crop, utility)
 - `/web`: Frontend del sito
 
+## Licenza e Citazioni
+
+Questo progetto utilizza il modello **YOLOv8s-obb** sviluppato da [Ultralytics](https://github.com/ultralytics/ultralytics).
+
+- **Codice e Modello:** Licenziati sotto [AGPL-3.0](https://help.ultralytics.com/main/hub/layers/licensing/).
+- **Uso Commerciale:** Per utilizzi commerciali che non prevedono la redistribuzione del codice sorgente, è necessaria una licenza Enterprise contattando direttamente Ultralytics.
+
+### Citazione
+Se usi questo lavoro nella tua ricerca, cita il repository originale:
+@software{yolov8_ultralytics,
+  author = {Glenn Jocher and Ayush Chaurasia and Jing Qiu},
+  title = {Ultralytics YOLOv8},
+  version = {8.0.0},
+  year = {2023},
+  url = {https://github.com/ultralytics/ultralytics},
+}
+
