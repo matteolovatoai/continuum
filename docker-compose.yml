@@ -1,0 +1,60 @@
+services:
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: "dockerfile ml service"
+    container_name: ml-service
+    restart: unless-stopped
+    # --- DEPLOYMENT CON GPU NVIDIA ---
+    # Scommenta questo blocco quando andrai su un server Linux con GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [ gpu ]
+    # environment:
+    #   - NVIDIA_VISIBLE_DEVICES=all
+    #   - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    # ---------------------------------
+    volumes:
+      - ./ml-service/models:/app/models:ro # monta qui i tuoi pesi .pt custom
+    expose:
+      - "8001" # visibile solo al gateway, non all'esterno
+    networks:
+      - pipeline-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s # tempo per caricare modelli + scaricare labels
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: "dockerfile gateway"
+    container_name: gateway
+    restart: unless-stopped
+    environment:
+      - ML_SERVICE_URL=http://ml-service:8001
+      - REQUEST_TIMEOUT_S=60
+      - SERVER_HOST=localhost # <-- cambia con l'IP del tuo server se remoto
+    ports:
+      - "8000:8000" # unico punto di accesso esterno
+    networks:
+      - pipeline-net
+    depends_on:
+      ml-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+networks:
+  pipeline-net:
+    driver: bridge
