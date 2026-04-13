@@ -3,7 +3,7 @@ services:
   ml-service:
     build:
       context: ./ml-service
-      dockerfile: "dockerfile ml service"
+      dockerfile: "Dockerfile"
     container_name: ml-service
     restart: unless-stopped
     # --- DEPLOYMENT CON GPU NVIDIA ---
@@ -35,13 +35,13 @@ services:
   gateway:
     build:
       context: ./gateway
-      dockerfile: "dockerfile gateway"
+      dockerfile: "Dockerfile"
     container_name: gateway
     restart: unless-stopped
     environment:
       - ML_SERVICE_URL=http://ml-service:8001
       - REQUEST_TIMEOUT_S=60
-      - SERVER_HOST=localhost # <-- cambia con l'IP del tuo server se remoto
+      - SERVER_HOST=0.0.0.0
     ports:
       - "8000:8000" # unico punto di accesso esterno
     networks:

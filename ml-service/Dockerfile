@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir torch torchvision --index-url https://download.py
 
 # Installa le dipendenze per l'API e YOLO
 RUN pip install --no-cache-dir \
+    "numpy<2" \
     fastapi \
     uvicorn \
     ultralytics \

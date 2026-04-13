@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
     mobilenet = tv_models.mobilenet_v3_large(weights=None)
     
     # Ricostruisco l'ultimo livello con 4 classi come fatto nel training
-    mobilenet.classifier[3] = torch.nn.Linear(mobilenet.classifier[3].in_features, 4) #type:ignore
+    mobilenet.classifier[3] = torch.nn.Linear(mobilenet.classifier[3].in_features, 3)
 
     # Carica lo state_dict custom bypassando i pesi di default
     state_dict = torch.load("/app/models/mobilenet_lego.pth", map_location=DEVICE)
@@ -44,7 +44,7 @@ async def lifespan(app: FastAPI):
 
     logger.info("Configuro le labels per i Lego...")
     # ImageFolder mappa automaticamente le classi in ordine alfabetico in base al nome delle cartelle
-    models["labels"] = ["bianco", "blu", "giallo", "rosso"]
+    models["labels"] = ["blu", "giallo", "rosso"]
 
     logger.info(f"Modelli pronti su {DEVICE}.")
     yield
@@ -64,9 +64,24 @@ _transform = T.Compose([
 ])
 
 
+def _reduce_glare(crop: Image.Image) -> Image.Image:
+    """Riduce i riflessi speculari normalizzando la luminosità in HSV."""
+    import cv2 as _cv2
+    import numpy as _np
+    bgr = _cv2.cvtColor(_np.array(crop), _cv2.COLOR_RGB2BGR)
+    hsv = _cv2.cvtColor(bgr, _cv2.COLOR_BGR2HSV)
+    h, s, v = _cv2.split(hsv)
+    clahe = _cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))
+    v = clahe.apply(v)
+    hsv = _cv2.merge([h, s, v])
+    bgr = _cv2.cvtColor(hsv, _cv2.COLOR_HSV2BGR)
+    return Image.fromarray(_cv2.cvtColor(bgr, _cv2.COLOR_BGR2RGB))
+
+
 def classify_crop(crop: Image.Image) -> tuple[str, float]:
     """Classifica un singolo crop PIL con MobileNet."""
-    tensor = _transform(crop).unsqueeze(0).to(DEVICE) # type: ignore
+    crop = _reduce_glare(crop)
+    tensor = _transform(crop).unsqueeze(0).to(DEVICE)
     with torch.no_grad():
         logits = models["mobilenet"](tensor)
     probs = torch.softmax(logits, dim=1)
@@ -105,11 +120,12 @@ async def detect(file: UploadFile = File(...)):
     w, h = image.size
 
     # --- YOLO: rilevamento box ---
-    yolo_results = models["yolo"](image, device=DEVICE, verbose=False)[0]
+    
+    yolo_results = models["yolo"](image, device=DEVICE, verbose=False, iou=0.4)[0]
 
     detections: list[Detection] = []
 
-    for box in yolo_results.boxes:
+    for box in (yolo_results.obb or []):
         x1, y1, x2, y2 = box.xyxy[0].tolist()
         yolo_class = yolo_results.names[int(box.cls[0].item())]
         yolo_conf = round(float(box.conf[0].item()), 4)

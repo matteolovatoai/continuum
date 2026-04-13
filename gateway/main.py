@@ -77,8 +77,7 @@ async def detect(file: UploadFile = File(...)):
 # ---------------------------------------------------------------------------
 @app.get("/health")
 async def health():
-    status = {}
-    status["status"] = {"gateway": "ok"}
+    status = {"gateway": "ok"}
     async with httpx.AsyncClient(timeout=5) as client:
         try:
             r = await client.get(f"{ML_SERVICE_URL}/health")
@@ -159,3 +158,7 @@ async def dashboard():
 </body>
 </html>"""
     return HTMLResponse(content=html)
+
+@app.get("/ready")
+def robot_arm_ready():
+    return "tutto ok"
